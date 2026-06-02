@@ -1,0 +1,16 @@
+# Generated at build time — never commit
+wakewordlab/_loader/key.c
+
+# Build artifacts
+build/
+dist/
+wheelhouse/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+*.so
+*.pyd
+.DS_Store
+SPEC.md
+test_live.py
