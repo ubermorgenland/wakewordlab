@@ -1,0 +1,19 @@
+services:
+  wyoming-wakewordlab:
+    build: .
+    image: ubermorgenland/wyoming-wakewordlab
+    restart: unless-stopped
+    ports:
+      - "10400:10400"
+    volumes:
+      - model-cache:/root/.cache/wakewordlab
+    environment:
+      - MODELS=hey_jarvis
+    command: >
+      --uri tcp://0.0.0.0:10400
+      --models hey_jarvis
+      --threshold 0.5
+      --refractory-seconds 2.0
+
+volumes:
+  model-cache:
