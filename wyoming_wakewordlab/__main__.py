@@ -12,6 +12,12 @@ from .handler import WakeWordHandler
 _LOGGER = logging.getLogger(__name__)
 
 
+_ATTRIBUTION = Attribution(
+    name="wakewordlab",
+    url="https://github.com/ubermorgenland/wakewordlab",
+)
+
+
 def _build_info(model_names: list[str], sessions: dict) -> Info:
     models = []
     for name in model_names:
@@ -20,17 +26,26 @@ def _build_info(model_names: list[str], sessions: dict) -> Info:
         models.append(
             WakeModel(
                 name=name,
-                phrase=phrase,
-                attribution=Attribution(
-                    name="wakewordlab",
-                    url="https://github.com/ubermorgenland/wakewordlab",
-                ),
+                attribution=_ATTRIBUTION,
                 installed=True,
                 description=f"Wake word: {phrase}",
                 version="1.0.0",
+                languages=["en"],
+                phrase=phrase,
             )
         )
-    return Info(wake=[WakeProgram(name="wakewordlab", models=models)])
+    return Info(
+        wake=[
+            WakeProgram(
+                name="wakewordlab",
+                attribution=_ATTRIBUTION,
+                installed=True,
+                description="On-device wake word detection",
+                version="1.0.0",
+                models=models,
+            )
+        ]
+    )
 
 
 async def run(args: argparse.Namespace) -> None:

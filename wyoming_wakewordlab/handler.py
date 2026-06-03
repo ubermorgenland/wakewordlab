@@ -40,7 +40,7 @@ class WakeWordHandler(AsyncEventHandler):
         self._last_detection = 0.0
         self._detected = False
 
-    async def handle(self, event: Event) -> bool:
+    async def handle_event(self, event: Event) -> bool:
         if Describe.is_type(event.type):
             await self.write_event(self._info.event())
             return True

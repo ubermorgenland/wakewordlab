@@ -1,7 +1,7 @@
 services:
   wyoming-wakewordlab:
     build: .
-    image: ubermorgenland/wyoming-wakewordlab
+    image: ubermorgenai/wyoming-wakewordlab
     restart: unless-stopped
     ports:
       - "10400:10400"
