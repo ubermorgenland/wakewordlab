@@ -106,6 +106,62 @@ from wakewordlab.audio import AudioStream
 print(AudioStream.list_devices())
 ```
 
+## Home Assistant (Wyoming Protocol)
+
+wakewordlab can run as a [Wyoming](https://github.com/rhasspy/wyoming) wake word server for [Home Assistant](https://www.home-assistant.io/), replacing or supplementing the built-in wake word engines.
+
+### Setup
+
+**1. Create `docker-compose.yml`:**
+
+```yaml
+services:
+  wyoming-wakewordlab:
+    image: ubermorgenai/wyoming-wakewordlab:latest
+    restart: unless-stopped
+    ports:
+      - "10400:10400"
+    volumes:
+      - model-cache:/root/.cache/wakewordlab
+    command: >
+      --uri tcp://0.0.0.0:10400
+      --models hey_jarvis
+      --threshold 0.6
+      --refractory-seconds 2.0
+
+volumes:
+  model-cache:
+```
+
+**2. Start the server:**
+
+```bash
+docker compose up -d
+```
+
+The model downloads automatically on first start and is cached in the volume — subsequent restarts are instant.
+
+**3. Add to Home Assistant:**
+
+Settings → Devices & Services → Add Integration → **Wyoming Protocol**
+- Host: IP address of the machine running Docker
+- Port: `10400`
+
+Home Assistant will detect the available wake words and you can assign one to a voice assistant pipeline.
+
+### Multiple models
+
+Run several wake words simultaneously by listing them:
+
+```yaml
+command: >
+  --uri tcp://0.0.0.0:10400
+  --models hey_jarvis stop
+  --threshold 0.6
+```
+
+---
+
 ## Commercial models
 
 Commercial models are distributed as `.wkw` files with a license key:
