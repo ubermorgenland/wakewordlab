@@ -8,6 +8,8 @@ Includes a [Silero VAD](https://github.com/snakers4/silero-vad) pre-filter that 
 
 If you want a wake word engine that is cheap enough to run continuously on small hardware, wakewordlab is aimed at that use case.
 
+It delivers roughly `15-30%` higher recall than open source alternatives while maintaining better or competitive false positives per hour.*
+
 For the local `hey_jarvis` benchmark files used here:
 
 - wakewordlab packaged model (`.wkw`): `244,541` bytes (`~240 KB`)
@@ -29,7 +31,12 @@ Measured on a Raspberry Pi 3 using one pinned CPU core, single-thread inference,
 
 ### Visual comparison
 <p align="center">
-  <img src="images/Size%20in%20MB%20vs%20Model%20footprint.png" alt="Model footprint" width="32%">
+  <img src="images/Recal%20vs%20FPR.png" alt="Recall vs false positives per hour" width="48%">
+  <img src="images/Size%20in%20MB%20vs%20Model%20footprint.png" alt="Model footprint" width="48%">
+</p>
+<p align="center"><sub>* Comparison was done against a trained openWakeWord model. YouTube audio without the wake word was used for false-positive evaluation, and a synthetic dataset was used for recall evaluation. There is no widely accepted benchmark for false positives per hour, so we consider this a more representative comparison. Both models scored `0` false positives on the DIPCO dataset used by Micro Wake Word for false-positive assessment.</sub></p>
+
+<p align="center">
   <img src="images/MMAC_s%20vs%20Raw%20compute%20rate.png" alt="Raw compute rate" width="32%">
   <img src="images/_%20of%20one%20Pi%203%20core%20vs%20Raspberry%20Pi%203%20measured%20CPU%20cost.png" alt="Raspberry Pi 3 measured CPU cost" width="32%">
 </p>
