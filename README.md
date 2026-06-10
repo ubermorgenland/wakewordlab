@@ -28,12 +28,11 @@ Measured on a Raspberry Pi 3 using one pinned CPU core, single-thread inference,
 | openWakeWord (`mel + embedding + hey_jarvis head`) | `42.4` | `80 ms` | `530.3` | `405.7 ms` | `40.6% of one core` | `2.66x` |
 
 ### Visual comparison
-
-![Model footprint](<images/Size in MB vs Model footprint.png>)
-
-![Raw compute rate](<images/MMAC_s vs Raw compute rate.png>)
-
-![Raspberry Pi 3 measured CPU cost](<images/_ of one Pi 3 core vs Raspberry Pi 3 measured CPU cost.png>)
+<p align="center">
+  <img src="images/Size%20in%20MB%20vs%20Model%20footprint.png" alt="Model footprint" width="32%">
+  <img src="images/MMAC_s%20vs%20Raw%20compute%20rate.png" alt="Raw compute rate" width="32%">
+  <img src="images/_%20of%20one%20Pi%203%20core%20vs%20Raspberry%20Pi%203%20measured%20CPU%20cost.png" alt="Raspberry Pi 3 measured CPU cost" width="32%">
+</p>
 
 ### What this means
 
