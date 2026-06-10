@@ -4,6 +4,45 @@ On-device wake word detection for Python.
 
 Includes a [Silero VAD](https://github.com/snakers4/silero-vad) pre-filter that gates inference on speech frames only, reducing CPU usage on silence and cutting false positives.
 
+## Why use wakewordlab
+
+If you want a wake word engine that is cheap enough to run continuously on small hardware, wakewordlab is aimed at that use case.
+
+For the local `hey_jarvis` benchmark files used here:
+
+- wakewordlab packaged model (`.wkw`): `244,541` bytes (`~240 KB`)
+- openWakeWord pipeline: `3,685,906` bytes total (`~3.5 MB`)
+  - mel: `1,087,958`
+  - embedding: `1,326,578`
+  - head: `1,271,370`
+
+That is roughly a **15x smaller shipped model footprint** for the wakewordlab path tested here.
+
+### Raspberry Pi 3: single-core benchmark
+
+Measured on a Raspberry Pi 3 using one pinned CPU core, single-thread inference, and 30 seconds of 16 kHz synthetic audio:
+
+| Engine | MMAC / invoke | Cadence | MMAC / sec | ms / sec audio | Core-equivalent load | Relative compute |
+|---|---:|---:|---:|---:|---:|---:|
+| **wakewordlab** (`20260609_142345`, non-streaming ONNX) | `4.81` | `100 ms` | **48.1** | **152.7 ms** | **15.3% of one core** | **1.0x** |
+| openWakeWord (`mel + embedding + hey_jarvis head`) | `42.4` | `80 ms` | `530.3` | `405.7 ms` | `40.6% of one core` | `2.66x` |
+
+### Visual comparison
+
+![Model footprint](<images/Size in MB vs Model footprint.png>)
+
+![Raw compute rate](<images/MMAC_s vs Raw compute rate.png>)
+
+![Raspberry Pi 3 measured CPU cost](<images/_ of one Pi 3 core vs Raspberry Pi 3 measured CPU cost.png>)
+
+### What this means
+
+- **Smaller deployment**: easier to ship, cache, and update on constrained devices
+- **Lower raw compute**: about **11x lower MACs per second** than the tested openWakeWord pipeline
+- **Lower steady CPU cost**: about **2.7x less CPU time** than the tested openWakeWord pipeline on Pi 3
+- **More headroom**: leaves more of the Pi for Home Assistant, audio I/O, automations, and UI work
+- **Simple packaging**: a single wakewordlab model file instead of a larger multi-model pipeline
+
 ## Installation
 
 ```bash
@@ -159,6 +198,60 @@ command: >
   --models hey_jarvis stop
   --threshold 0.6
 ```
+
+---
+
+## Compute footprint on Home Assistant hardware
+
+Most Home Assistant deployments run on a **Raspberry Pi 4/5** or the dedicated **HA Green** (Rockchip RK3566, quad-core Cortex-A55 @ 1.8 GHz, 4 GB RAM). These are capable machines, but always-on wake word detection still competes with automations, integrations, and add-ons for the same CPU budget.
+
+The table below compares wakewordlab against the two most commonly referenced alternatives: [openWakeWord](https://github.com/dscripka/openWakeWord) (the default HA voice pipeline engine). Numbers are measured from the actual model files.
+
+### Compute comparison
+
+| Engine | MACs / invoke | Cadence | **MMAC/s** | HA Green core load¹ |
+|---|---|---|---|---|
+| **wakewordlab** (streaming) | ~885 k | 37.5 ms | **~24** | **~1–2%** |
+| **wakewordlab** (batch, 100 ms) | ~3.15 M | 100 ms | **~31** | **~2–3%** |
+| openWakeWord (embed + 1 head) | ~42 M | 80 ms | **~525** | **~26–53%** |
+
+¹ Cortex-A55 @ 1.8 GHz, single-threaded NEON, ~1–2 GMAC/s per core.
+
+### Why openWakeWord costs so much
+
+openWakeWord is a two-stage system. Stage 1 is a large pretrained Google speech embedding model (42 M MACs) that must run on **every 80 ms audio chunk**, regardless of which or how many wake words you are using. Stage 2 is a tiny per-wake-word head (~50 k MACs) that is nearly free. The embedding is the bottleneck, and it cannot be skipped or shared with any other task.
+
+On a laptop this is invisible. On an HA Green it loads one Cortex-A55 core by **26–53%**, which directly competes with Zigbee polling, recorder writes, and UI requests.
+
+### Why wakewordlab stays cheap
+
+wakewordlab uses a single self-contained convolutional model — no external embedding dependency. The full streaming path costs **~24 MMAC/s**: roughly **22× less than openWakeWord** and comparable to what a Raspberry Pi 3 handles without breaking a sweat.
+
+Additionally, the **Silero VAD pre-filter** (enabled by default) gates inference so the wake word model only runs on frames that contain speech. During silence — which is the majority of time in a home environment — the effective compute drops toward zero.
+
+| Condition | Effective wake word compute |
+|---|---|
+| Silence (VAD off) | 0 — model not invoked |
+| Speech present (VAD on) | ~24 MMAC/s streaming |
+| Continuous (VAD disabled) | ~24–31 MMAC/s |
+
+### Each additional wake word
+
+| Engine | Cost of adding one more wake word |
+|---|---|
+| openWakeWord | +50 k MACs/invoke — nearly free (head only, embed is shared) |
+| **wakewordlab** | +~885 k MACs/invoke per model in streaming mode |
+
+openWakeWord has a clear advantage when running many wake words simultaneously. wakewordlab's per-model cost is higher, but because the baseline is ~22× lower, **two wakewordlab models (~48 MMAC/s) still use less than a tenth of the compute of one openWakeWord instance (~525 MMAC/s)**.
+
+### Summary
+
+- **22× lower compute per second** than openWakeWord on the same hardware
+- **~1–2% of one CPU core** on HA Green at streaming cadence
+- **VAD gating** eliminates nearly all compute during silence
+- **Self-contained** — no shared embedding model, no external dependency
+- **37.5 ms detection cadence** (faster than openWakeWord's 80 ms)
+- Runs comfortably on **Raspberry Pi 3** and all newer Pi and HA hardware
 
 ---
 
