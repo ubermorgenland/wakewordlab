@@ -41,13 +41,16 @@ Measured on a Raspberry Pi 3 using one pinned CPU core, single-thread inference,
   <img src="images/_%20of%20one%20Pi%203%20core%20vs%20Raspberry%20Pi%203%20measured%20CPU%20cost.png" alt="Raspberry Pi 3 measured CPU cost" width="32%">
 </p>
 
-### What this means
+### Features
 
+- **Lightwegiht CNN arch**: lightweight CNN arch - less than 25KB (model size)
+- **Improved recall & false positives per hour**: up to 10-20% recall improvement and less 5-7x false positives compared to openwakeword
 - **Smaller deployment**: easier to ship, cache, and update on constrained devices
 - **Lower raw compute**: about **11x lower MACs per second** than the tested openWakeWord pipeline
 - **Lower steady CPU cost**: about **2.7x less CPU time** than the tested openWakeWord pipeline on Pi 3
 - **More headroom**: leaves more of the Pi for Home Assistant, audio I/O, automations, and UI work
 - **Simple packaging**: a single wakewordlab model file instead of a larger multi-model pipeline
+
 
 ## Installation
 
