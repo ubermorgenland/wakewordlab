@@ -43,6 +43,7 @@ Measured on a Raspberry Pi 3 using one pinned CPU core, single-thread inference,
 
 ### Features
 
+- **Deloyment** Wyoming Protocol server included for Home Assistant
 - **Lightwegiht CNN arch**: lightweight CNN arch - less than 25KB (model size)
 - **Improved recall & false positives per hour**: up to 10-20% recall improvement and less 5-7x false positives compared to openwakeword
 - **Smaller deployment**: easier to ship, cache, and update on constrained devices
